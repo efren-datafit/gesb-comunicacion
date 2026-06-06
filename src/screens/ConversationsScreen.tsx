@@ -14,9 +14,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getUserConversations } from "../api/chatsApi";
 import { ConversationCard } from "../components/ConversationCard";
+import { ChatMessagesScreen } from "./ChatMessagesScreen";
 import { colors } from "../theme/colors";
 import { AuthUser } from "../types/auth";
 import { Conversation } from "../types/conversation";
+
+const CONVERSATIONS_REFRESH_INTERVAL_MS = 10000;
 
 type ConversationsScreenProps = {
   currentUser: AuthUser;
@@ -29,16 +32,19 @@ export function ConversationsScreen({ currentUser, onLogout }: ConversationsScre
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
   const loadConversations = useCallback(
-    async (refresh = false) => {
+    async (refresh = false, silent = false) => {
       if (refresh) {
         setRefreshing(true);
-      } else {
+      } else if (!silent) {
         setLoading(true);
       }
 
-      setErrorMessage(null);
+      if (!silent) {
+        setErrorMessage(null);
+      }
 
       try {
         const userConversations = await getUserConversations(currentUser.idus);
@@ -46,9 +52,13 @@ export function ConversationsScreen({ currentUser, onLogout }: ConversationsScre
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "No fue posible cargar las conversaciones.";
-        setErrorMessage(message);
+        if (!silent) {
+          setErrorMessage(message);
+        }
       } finally {
-        setLoading(false);
+        if (!silent) {
+          setLoading(false);
+        }
         setRefreshing(false);
       }
     },
@@ -58,6 +68,18 @@ export function ConversationsScreen({ currentUser, onLogout }: ConversationsScre
   useEffect(() => {
     loadConversations();
   }, [loadConversations]);
+
+  useEffect(() => {
+    if (selectedConversation) {
+      return undefined;
+    }
+
+    const intervalId = setInterval(() => {
+      loadConversations(false, true);
+    }, CONVERSATIONS_REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [loadConversations, selectedConversation]);
 
   const filteredConversations = useMemo(() => {
     const query = searchText.trim().toLowerCase();
@@ -72,10 +94,10 @@ export function ConversationsScreen({ currentUser, onLogout }: ConversationsScre
         conversation.lastMessage.toLowerCase().includes(query)
       );
     });
-  }, [searchText]);
+  }, [conversations, searchText]);
 
   const openConversation = (conversation: Conversation) => {
-    Alert.alert("Conversación", `Abrir conversación con ${conversation.recipientName}.`);
+    setSelectedConversation(conversation);
   };
 
   const openProfile = () => {
@@ -85,9 +107,15 @@ export function ConversationsScreen({ currentUser, onLogout }: ConversationsScre
     ]);
   };
 
-  const startConversation = () => {
-    Alert.alert("Iniciar conversación", "Buscar usuarios en la base de datos.");
-  };
+  if (selectedConversation) {
+    return (
+      <ChatMessagesScreen
+        conversation={selectedConversation}
+        currentUser={currentUser}
+        onBack={() => setSelectedConversation(null)}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
@@ -114,6 +142,15 @@ export function ConversationsScreen({ currentUser, onLogout }: ConversationsScre
               style={styles.searchInput}
             />
           </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Abrir perfil"
+            onPress={openProfile}
+            style={({ pressed }) => [styles.headerProfileButton, pressed && styles.buttonPressed]}
+          >
+            <Ionicons name="person-outline" size={18} color={colors.text} />
+          </Pressable>
         </View>
 
         <FlatList
@@ -146,32 +183,6 @@ export function ConversationsScreen({ currentUser, onLogout }: ConversationsScre
             </View>
           }
         />
-
-        <View style={styles.bottomBar}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Abrir perfil"
-            onPress={openProfile}
-            style={({ pressed }) => [styles.navButton, pressed && styles.buttonPressed]}
-          >
-            <Ionicons name="person-outline" size={18} color={colors.text} />
-            <Text style={styles.navButtonText}>Perfil</Text>
-          </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Iniciar conversación"
-            onPress={startConversation}
-            style={({ pressed }) => [
-              styles.navButton,
-              styles.primaryButton,
-              pressed && styles.buttonPressed
-            ]}
-          >
-            <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.accentText} />
-            <Text style={styles.primaryButtonText}>Iniciar conversación</Text>
-          </Pressable>
-        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -255,6 +266,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: colors.card
   },
+  headerProfileButton: {
+    width: 38,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: 8,
+    backgroundColor: colors.card
+  },
   searchInput: {
     flex: 1,
     minWidth: 0,
@@ -301,42 +322,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700"
   },
-  bottomBar: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingTop: 13,
-    paddingBottom: 18,
-    backgroundColor: colors.header
-  },
-  navButton: {
-    minHeight: 42,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    borderRadius: 8,
-    backgroundColor: colors.card
-  },
-  primaryButton: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accent
-  },
   buttonPressed: {
     opacity: 0.78
-  },
-  navButtonText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: "700"
-  },
-  primaryButtonText: {
-    color: colors.accentText,
-    fontSize: 12,
-    fontWeight: "700"
   }
 });

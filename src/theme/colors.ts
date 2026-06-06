@@ -10,6 +10,6 @@ export const colors = {
   textStrong: "#533d23",
   textMuted: "#866f52",
   textSoft: "#725f48",
-  accent: "#315d68",
+  accent: "#820010",
   accentText: "#ffffff"
 };

@@ -6,18 +6,34 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "scheme": "gesbcomunicacion",
+    "plugins": [
+      "expo-notifications"
+    ],
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.datafit.gesbcomunicacion"
+      "bundleIdentifier": "com.datafit.gesbcomunicacion",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.datafit.gesbcomunicacion",
+      "softwareKeyboardLayoutMode": "resize",
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ],
       "adaptiveIcon": {
-        "backgroundColor": "#315D68"
+        "backgroundColor": "#820010"
       }
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "21d1d104-d5ce-4dbd-bef8-e15b84ea6971"
+      }
+    },
+    "owner": "devdatafit"
   }
 }

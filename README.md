@@ -6,9 +6,11 @@ Base móvil de la vista principal para una aplicación de comunicación tipo Wha
 
 - Pantalla de inicio de sesión conectada al webservice de acceso.
 - Vista principal conectada al webservice de conversaciones.
-- Encabezado con título, usuario actual y buscador.
+- Vista de mensajes de un chat específico.
+- Encabezado con título, usuario actual, buscador y acceso a perfil.
 - Lista de conversaciones con destinatario, último mensaje y fecha.
-- Barra inferior con dos acciones: Perfil e Iniciar conversación.
+- Mensajes alineados por remitente y destinatario.
+- Campo inferior para redactar mensajes con ajuste al teclado.
 - Configuración inicial para crear builds con EAS en Android e iOS.
 
 ## Estructura
@@ -24,6 +26,7 @@ src/
   screens/
     LoginScreen.tsx
     ConversationsScreen.tsx
+    ChatMessagesScreen.tsx
   theme/
     colors.ts
   types/
@@ -81,6 +84,117 @@ El cliente de conversaciones está en:
 src/api/chatsApi.ts
 ```
 
+## Vista de mensajes
+
+Al tocar una conversación, la app abre la vista del chat. El encabezado muestra una flecha para regresar, el área como título y el nombre asociado a la conversación debajo.
+
+Los mensajes del usuario actual se alinean a la derecha; los mensajes del destinatario se alinean a la izquierda. Cada burbuja muestra el mensaje y la fecha de envío en texto pequeño.
+
+La lectura de mensajes usa:
+
+```text
+https://escolarex.com/ws_app/c_chats_mensajes.php
+```
+
+El cuerpo se envía como JSON:
+
+```json
+{
+  "idchat": "1"
+}
+```
+
+El campo inferior permite escribir un mensaje y la vista se ajusta cuando aparece el teclado del dispositivo.
+
+El envío de mensajes usa:
+
+```text
+https://escolarex.com/ws_app/c_chats_nmsg.php
+```
+
+El cuerpo se envía como JSON:
+
+```json
+{
+  "idchat": "2",
+  "idus": "1565718332",
+  "usuario": "EFREN CALVO",
+  "tipo": "TEXTO",
+  "msg": "Buenos días Sr Javier"
+}
+```
+
+Después de guardar el mensaje, la app recupera el token Expo del destinatario con:
+
+```text
+https://escolarex.com/ws_app/c_chats_token.php
+```
+
+El cuerpo se envía como JSON:
+
+```json
+{
+  "idchat": "2"
+}
+```
+
+La respuesta esperada trae el token en `data`:
+
+```json
+{
+  "res": "ok",
+  "msg": "Token recuperado",
+  "data": "ExponentPushToken[LfzNumKzMz1QDsJS2wbG0D]"
+}
+```
+
+Con ese token, la app envía una notificación a Expo:
+
+```text
+https://exp.host/--/api/v2/push/send
+```
+
+El título es `Nuevo mensaje GESB` y el cuerpo es el mensaje escrito por el usuario.
+
+## Recepción en tiempo real
+
+La app refresca automáticamente la información usando los webservices actuales:
+
+- La vista principal consulta conversaciones cada 10 segundos mientras está visible.
+- La vista de mensajes consulta el chat abierto cada 5 segundos.
+
+Este mecanismo permite recibir mensajes nuevos sin recargar manualmente. Si más adelante existe un canal WebSocket o SSE, puede reemplazar este sondeo periódico.
+
+## Registro de token push
+
+Después de iniciar sesión, la app solicita permisos de notificación, genera el token Expo del dispositivo y lo guarda con:
+
+```text
+https://escolarex.com/ws_app/c_token_guardar.php
+```
+
+El cuerpo se envía como JSON:
+
+```json
+{
+  "idus": "1565718332",
+  "token": "ExponentPushToken[...]",
+  "device_id": "identificador_del_dispositivo",
+  "model": "modelo",
+  "system": "Android",
+  "version": "15",
+  "brand": "marca"
+}
+```
+
+Para generar el token se usan `expo-notifications`, `expo-device` y `expo-application`. En Android también se configura el permiso `POST_NOTIFICATIONS`.
+
+## Persistencia de sesión
+
+Después de iniciar sesión correctamente, la app guarda el objeto del usuario en almacenamiento seguro del dispositivo con `expo-secure-store`. Al abrir la app de nuevo, intenta restaurar esa sesión antes de mostrar la pantalla de acceso.
+
+Al cerrar sesión desde Perfil, la sesión local se elimina y la app vuelve a mostrar el inicio de sesión.
+
 ## Ejecutar la app
 
 Instala dependencias:
@@ -99,12 +213,10 @@ Luego puedes abrir la app en Android, iOS o web desde Expo.
 
 ## Próximas funcionalidades sugeridas
 
-1. Persistir la sesión del usuario en el dispositivo.
-2. Crear una pantalla de conversación individual.
-3. Crear una pantalla para seleccionar usuarios e iniciar conversaciones.
-4. Crear perfil de usuario.
-5. Agregar recuperación de contraseña o cambio de contraseña.
-6. Agregar envío y recepción de mensajes en tiempo real.
+1. Crear una pantalla para seleccionar usuarios e iniciar conversaciones.
+2. Crear perfil de usuario.
+3. Agregar recuperación de contraseña o cambio de contraseña.
+4. Reemplazar el sondeo de mensajes por WebSocket o SSE si el backend lo ofrece.
 
 ## Subir a GitHub
 
