@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "GESB Comunicación",
+    "slug": "gesb-comunicacion",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "gesbcomunicacion",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.datafit.gesbcomunicacion"
+    },
+    "android": {
+      "package": "com.datafit.gesbcomunicacion",
+      "adaptiveIcon": {
+        "backgroundColor": "#315D68"
+      }
+    }
+  }
+}

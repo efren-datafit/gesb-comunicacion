@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GESB Comunicación</title>
+    <style>
+      :root {
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #f5f1ea;
+        color: #4c3822;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        background: #f5f1ea;
+      }
+
+      .phone {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: min(100%, 390px);
+        height: min(760px, calc(100vh - 40px));
+        min-height: 680px;
+        overflow: hidden;
+        border: 1px solid rgba(88, 68, 38, 0.16);
+        border-radius: 32px;
+        background: #fffaf2;
+        box-shadow: 0 22px 48px rgba(62, 48, 30, 0.18);
+      }
+
+      .phone::before {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        width: 88px;
+        height: 5px;
+        border-radius: 999px;
+        transform: translateX(-50%);
+        background: rgba(82, 62, 38, 0.22);
+      }
+
+      .app-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 122px;
+        gap: 12px;
+        align-items: center;
+        padding: 34px 18px 17px;
+        background: #fff6e8;
+      }
+
+      .title-block {
+        min-width: 0;
+      }
+
+      h1 {
+        margin: 0 0 5px;
+        color: #533d23;
+        font-size: 22px;
+        line-height: 1.08;
+        font-weight: 790;
+        letter-spacing: 0;
+      }
+
+      .user-name {
+        margin: 0;
+        color: #866f52;
+        font-size: 13px;
+        line-height: 1.2;
+      }
+
+      .search {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        align-items: center;
+        gap: 7px;
+        min-height: 38px;
+        padding: 0 10px;
+        border: 1px solid #ead8bd;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #82684a;
+        font: inherit;
+        text-align: left;
+      }
+
+      .search span {
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .icon {
+        display: block;
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+
+      .conversation-list {
+        display: grid;
+        gap: 12px;
+        flex: 1;
+        min-height: 0;
+        padding: 14px 16px 18px;
+        overflow-y: auto;
+      }
+
+      .chat-card {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        min-height: 82px;
+        padding: 13px;
+        border: 1px solid #ecdcc3;
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .chat-card:nth-child(2n) {
+        background: #fff3dd;
+      }
+
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        background: #315d68;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 760;
+      }
+
+      .chat-content {
+        min-width: 0;
+      }
+
+      .chat-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .recipient {
+        overflow: hidden;
+        color: #4c3822;
+        font-size: 15px;
+        line-height: 1.15;
+        font-weight: 740;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      time {
+        flex: 0 0 auto;
+        color: #866f52;
+        font-size: 11px;
+        line-height: 1;
+      }
+
+      .last-message {
+        display: -webkit-box;
+        overflow: hidden;
+        margin: 0;
+        color: #725f48;
+        font-size: 13px;
+        line-height: 1.35;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .bottom-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 13px 16px 18px;
+        background: #fff6e8;
+      }
+
+      .nav-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 42px;
+        padding: 0 12px;
+        border: 1px solid #dfc8a7;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #624a2d;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 740;
+        white-space: nowrap;
+      }
+
+      .nav-button.primary {
+        border-color: #315d68;
+        background: #315d68;
+        color: #ffffff;
+      }
+
+      @media (max-width: 430px) {
+        body {
+          padding: 0;
+          background: #fffaf2;
+        }
+
+        .phone {
+          width: 100%;
+          height: 100vh;
+          min-height: 0;
+          border: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .app-header {
+          grid-template-columns: minmax(0, 1fr) 112px;
+          padding-right: 16px;
+          padding-left: 16px;
+        }
+
+        h1 {
+          font-size: 20px;
+        }
+
+        .nav-button {
+          padding: 0 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="phone" aria-label="Vista principal de GESB Comunicación">
+      <header class="app-header">
+        <div class="title-block">
+          <h1>GESB Comunicación</h1>
+          <p class="user-name">Mariana Torres</p>
+        </div>
+        <button class="search" type="button" aria-label="Buscar conversaciones">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m21 21-4.3-4.3" />
+            <circle cx="11" cy="11" r="7" />
+          </svg>
+          <span>Buscar</span>
+        </button>
+      </header>
+
+      <section class="conversation-list" aria-label="Conversaciones">
+        <article class="chat-card">
+          <div class="avatar">AR</div>
+          <div class="chat-content">
+            <div class="chat-top">
+              <span class="recipient">Alejandro Ruiz</span>
+              <time datetime="2026-06-05">05 Jun</time>
+            </div>
+            <p class="last-message">Confirmo recepción del reporte y avanzo con las observaciones.</p>
+          </div>
+        </article>
+
+        <article class="chat-card">
+          <div class="avatar">CL</div>
+          <div class="chat-content">
+            <div class="chat-top">
+              <span class="recipient">Camila López</span>
+              <time datetime="2026-06-04">04 Jun</time>
+            </div>
+            <p class="last-message">La base quedó actualizada con los usuarios activos del área.</p>
+          </div>
+        </article>
+
+        <article class="chat-card">
+          <div class="avatar">JM</div>
+          <div class="chat-content">
+            <div class="chat-top">
+              <span class="recipient">Jorge Medina</span>
+              <time datetime="2026-06-03">03 Jun</time>
+            </div>
+            <p class="last-message">Te comparto la propuesta final para revisión antes del envío.</p>
+          </div>
+        </article>
+
+        <article class="chat-card">
+          <div class="avatar">RS</div>
+          <div class="chat-content">
+            <div class="chat-top">
+              <span class="recipient">Renata Salas</span>
+              <time datetime="2026-06-01">01 Jun</time>
+            </div>
+            <p class="last-message">Queda pendiente validar el acceso del nuevo equipo de soporte.</p>
+          </div>
+        </article>
+
+        <article class="chat-card">
+          <div class="avatar">MV</div>
+          <div class="chat-content">
+            <div class="chat-top">
+              <span class="recipient">Miguel Vargas</span>
+              <time datetime="2026-05-29">29 May</time>
+            </div>
+            <p class="last-message">Gracias, quedo atento a la confirmación de la próxima reunión.</p>
+          </div>
+        </article>
+      </section>
+
+      <nav class="bottom-bar" aria-label="Acciones principales">
+        <button class="nav-button" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          Perfil
+        </button>
+        <button class="nav-button primary" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+            <path d="M12 8v6" />
+            <path d="M9 11h6" />
+          </svg>
+          Iniciar conversación
+        </button>
+      </nav>
+    </main>
+  </body>
+</html>
