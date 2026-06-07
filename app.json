@@ -4,6 +4,7 @@
     "slug": "gesb-comunicacion",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "gesbcomunicacion",
     "plugins": [
@@ -26,8 +27,16 @@
         "POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#820010"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
       }
+    },
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#820010"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {

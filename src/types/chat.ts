@@ -57,27 +57,3 @@ export type SendChatMessageResponse = {
   msg: string;
   data?: unknown;
 };
-
-export type ChatPushTokenResponse = {
-  res: string;
-  msg: string;
-  data?: string | null;
-};
-
-export type ExpoPushMessage = {
-  to: string;
-  title: string;
-  body: string;
-};
-
-export type ExpoPushTicket = {
-  status?: string;
-  id?: string;
-  message?: string;
-  details?: unknown;
-};
-
-export type ExpoPushResponse = {
-  data?: ExpoPushTicket | ExpoPushTicket[];
-  errors?: unknown[];
-};

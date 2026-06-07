@@ -12,6 +12,7 @@ Base móvil de la vista principal para una aplicación de comunicación tipo Wha
 - Mensajes alineados por remitente y destinatario.
 - Campo inferior para redactar mensajes con ajuste al teclado.
 - Configuración inicial para crear builds con EAS en Android e iOS.
+- Ícono de app personalizado en `assets/icon.png`.
 
 ## Estructura
 
@@ -124,37 +125,7 @@ El cuerpo se envía como JSON:
 }
 ```
 
-Después de guardar el mensaje, la app recupera el token Expo del destinatario con:
-
-```text
-https://escolarex.com/ws_app/c_chats_token.php
-```
-
-El cuerpo se envía como JSON:
-
-```json
-{
-  "idchat": "2"
-}
-```
-
-La respuesta esperada trae el token en `data`:
-
-```json
-{
-  "res": "ok",
-  "msg": "Token recuperado",
-  "data": "ExponentPushToken[LfzNumKzMz1QDsJS2wbG0D]"
-}
-```
-
-Con ese token, la app envía una notificación a Expo:
-
-```text
-https://exp.host/--/api/v2/push/send
-```
-
-El título es `Nuevo mensaje GESB` y el cuerpo es el mensaje escrito por el usuario.
+Las notificaciones push por mensaje se envían desde el webservice de mensajes. La app no llama directamente a Expo Push al enviar.
 
 ## Recepción en tiempo real
 

@@ -3,11 +3,8 @@ import {
   ChatMessageApiItem,
   ChatMessagesCollection,
   ChatMessagesResponse,
-  ChatPushTokenResponse,
   ChatsCollection,
   ChatsResponse,
-  ExpoPushMessage,
-  ExpoPushResponse,
   SendChatMessagePayload,
   SendChatMessageResponse
 } from "../types/chat";
@@ -16,9 +13,6 @@ import { ChatMessage, Conversation } from "../types/conversation";
 const CHATS_URL = "https://escolarex.com/ws_app/c_chats.php";
 const CHAT_MESSAGES_URL = "https://escolarex.com/ws_app/c_chats_mensajes.php";
 const SEND_CHAT_MESSAGE_URL = "https://escolarex.com/ws_app/c_chats_nmsg.php";
-const CHAT_PUSH_TOKEN_URL = "https://escolarex.com/ws_app/c_chats_token.php";
-const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
-const NEW_MESSAGE_PUSH_TITLE = "Nuevo mensaje GESB";
 
 export async function getUserConversations(idus: string): Promise<Conversation[]> {
   const response = await fetch(CHATS_URL, {
@@ -102,75 +96,6 @@ export async function sendChatMessage(payload: SendChatMessagePayload): Promise<
 
   if (data.res !== "ok" && data.res !== "200") {
     throw new Error(data.msg || "No fue posible enviar el mensaje.");
-  }
-}
-
-export async function notifyChatRecipient(idchat: string, message: string): Promise<void> {
-  const token = await getChatPushToken(idchat);
-
-  if (!token) {
-    return;
-  }
-
-  await sendExpoPushNotification({
-    to: token,
-    title: NEW_MESSAGE_PUSH_TITLE,
-    body: message
-  });
-}
-
-async function getChatPushToken(idchat: string): Promise<string | null> {
-  const response = await fetch(CHAT_PUSH_TOKEN_URL, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ idchat })
-  });
-
-  if (!response.ok) {
-    throw new Error("No fue posible recuperar el token de notificación.");
-  }
-
-  const data = (await response.json()) as ChatPushTokenResponse;
-
-  if (!data || typeof data.res !== "string") {
-    throw new Error("El servicio de token respondió con un formato no reconocido.");
-  }
-
-  if (data.res !== "ok") {
-    throw new Error(data.msg || "No fue posible recuperar el token de notificación.");
-  }
-
-  return data.data || null;
-}
-
-async function sendExpoPushNotification(message: ExpoPushMessage): Promise<void> {
-  const response = await fetch(EXPO_PUSH_URL, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Accept-Encoding": "gzip, deflate",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(message)
-  });
-
-  if (!response.ok) {
-    throw new Error("No fue posible enviar la notificación Expo.");
-  }
-
-  const data = (await response.json()) as ExpoPushResponse;
-  const tickets = Array.isArray(data.data) ? data.data : data.data ? [data.data] : [];
-  const failedTicket = tickets.find((ticket) => ticket.status && ticket.status !== "ok");
-
-  if (failedTicket) {
-    throw new Error(failedTicket.message || "Expo rechazó la notificación.");
-  }
-
-  if (data.errors?.length) {
-    throw new Error("Expo respondió con errores al enviar la notificación.");
   }
 }
 

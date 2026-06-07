@@ -12,12 +12,13 @@ import {
   View
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { getChatMessages, notifyChatRecipient, sendChatMessage } from "../api/chatsApi";
+import { getChatMessages, sendChatMessage } from "../api/chatsApi";
 import { colors } from "../theme/colors";
 import { AuthUser } from "../types/auth";
 import { ChatMessage, Conversation } from "../types/conversation";
 
 const MESSAGES_REFRESH_INTERVAL_MS = 5000;
+const COMPOSER_RESERVED_HEIGHT = 86;
 
 type ChatMessagesScreenProps = {
   conversation: Conversation;
@@ -101,6 +102,7 @@ export function ChatMessagesScreen({
 
   const sortedMessages = useMemo(() => messages, [messages]);
   const composerLift = Math.max(keyboardHeight - insets.bottom, 0);
+  const messagesBottomPadding = COMPOSER_RESERVED_HEIGHT + composerLift;
 
   const sendMessage = async () => {
     const cleanText = messageText.trim();
@@ -120,23 +122,8 @@ export function ChatMessagesScreen({
         msg: cleanText
       });
 
-      let notificationErrorMessage: string | null = null;
-
-      try {
-        await notifyChatRecipient(conversation.id, cleanText);
-      } catch (error) {
-        notificationErrorMessage =
-          error instanceof Error
-            ? `Mensaje enviado, pero ${error.message.toLowerCase()}`
-            : "Mensaje enviado, pero no fue posible enviar la notificación.";
-      }
-
       setMessageText("");
       await loadMessages(true);
-
-      if (notificationErrorMessage) {
-        setErrorMessage(notificationErrorMessage);
-      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No fue posible enviar el mensaje.";
@@ -170,7 +157,10 @@ export function ChatMessagesScreen({
         </View>
 
         <FlatList
-          contentContainerStyle={styles.messagesContent}
+          contentContainerStyle={[
+            styles.messagesContent,
+            { paddingBottom: messagesBottomPadding }
+          ]}
           data={sortedMessages}
           keyExtractor={(item) => item.id}
           keyboardShouldPersistTaps="handled"
@@ -199,7 +189,7 @@ export function ChatMessagesScreen({
           }
         />
 
-        <View style={[styles.composer, { marginBottom: composerLift }]}>
+        <View style={[styles.composer, { bottom: composerLift }]}>
           <TextInput
             accessibilityLabel="Escribir nuevo mensaje"
             multiline
@@ -291,6 +281,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    position: "relative",
     backgroundColor: colors.surface
   },
   header: {
@@ -336,8 +327,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: 10,
     paddingHorizontal: 14,
-    paddingTop: 16,
-    paddingBottom: 18
+    paddingTop: 16
   },
   messageRow: {
     width: "100%",
@@ -418,6 +408,9 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   },
   composer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
     flexDirection: "row",
     alignItems: "flex-end",
     gap: 10,
