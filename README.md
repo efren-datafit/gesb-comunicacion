@@ -1,6 +1,6 @@
 # GESB Comunicación
 
-Base móvil de la vista principal para una aplicación de comunicación tipo WhatsApp, construida con Expo y React Native.
+Base móvil de la vista principal para una aplicación de comunicación interna, construida con Expo y React Native.
 
 ## Qué incluye
 
